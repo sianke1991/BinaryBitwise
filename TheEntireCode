@@ -1,0 +1,172 @@
+/*The Entire Code 2021-07-20*/
+PImage background;
+int arg0=0;
+int arg1=0;
+int result=0;
+int typeOper=0; //0: result=0, 1: bitwise AND, 2: bitwise OR, 3: bitwise XOR
+final int NUM_OPERS=3;
+final int NUM_BOXES = 8;
+final int NUM_VALS=3;
+float[][] arrArg0 = new float[NUM_BOXES][4];
+float[][] arrArg1 = new float[NUM_BOXES][4];
+float[][] arrResult = new float[NUM_BOXES][4];
+float boxWidth;
+float boxHeight;
+float boxSpacing;
+boolean isArg0Hidden=false;
+
+
+
+void setup(){
+  size(1200,900);
+  background=loadImage("background.jpg");
+  boxWidth=width/18.0f;
+  boxHeight=boxWidth;
+  boxSpacing=boxWidth/3.0f;
+  for(int i=0;i<arrArg0.length;i++){
+    arrArg0[i][0]=(width-(NUM_BOXES*boxWidth+(NUM_BOXES-1)*boxSpacing))/3.0f+i*(boxWidth+boxSpacing);
+    arrArg0[i][1]=(height-(NUM_VALS*boxHeight+(NUM_VALS-1)*boxSpacing))/3.0f;
+    arrArg0[i][2]=boxWidth;
+    arrArg0[i][3]=boxHeight;
+  }
+  for(int i=0;i<arrArg1.length;i++){
+    arrArg1[i][0]=arrArg0[i][0];
+    arrArg1[i][1]=arrArg0[i][1]+boxHeight+boxSpacing;
+    arrArg1[i][2]=boxWidth;
+    arrArg1[i][3]=boxHeight;
+  }
+  
+  for(int i=0;i<arrResult.length;i++){
+    arrResult[i][0]=arrArg0[i][0];
+    arrResult[i][1]=arrArg1[i][1]+boxHeight+2*boxSpacing;
+    arrResult[i][2]=boxWidth;
+    arrResult[i][3]=boxHeight;
+  }
+  
+  
+} 
+
+
+void draw(){
+  image(background,0,0,width,height);
+  textSize(48);
+  fill(0);
+  textAlign(CENTER,TOP);
+  text("binary bitwise operators",width/2,48);
+  textSize(24);
+  textAlign(RIGHT,TOP);
+  text("(sianke1991)",width/8*7,120);
+  
+  if(!isArg0Hidden){
+    for(int i=0;i<NUM_BOXES;i++){
+      showBitBox(arrArg0[i][0],arrArg0[i][1],arrArg0[i][2],arrArg0[i][3],(arg0&(1<<(NUM_BOXES-1-i)))!=0);
+    }
+  } else{
+    noStroke();
+    fill(255,127);
+    rect(arrArg0[0][0]-boxSpacing,arrArg0[0][1]-boxSpacing,width-2*(arrArg0[0][0]-boxSpacing)+boxHeight,boxHeight+boxSpacing);
+  }
+  for(int i=0;i<NUM_BOXES;i++){
+    showBitBox(arrArg1[i][0],arrArg1[i][1],arrArg1[i][2],arrArg1[i][3],(arg1&(1<<(NUM_BOXES-1-i)))!=0);
+  }
+  
+  strokeWeight(3);
+  stroke(0);
+  line(arrArg1[0][0]-boxSpacing,arrArg1[0][1]+boxHeight+boxSpacing,arrArg1[NUM_BOXES-1][0]+boxWidth+boxSpacing,arrArg1[0][1]+boxHeight+boxSpacing);
+  
+  for(int i=0;i<NUM_BOXES;i++){
+    showBitBox(arrResult[i][0],arrResult[i][1],arrResult[i][2],arrResult[i][3],(result&(1<<(NUM_BOXES-1-i)))!=0);
+  }
+  
+  fill(0);
+  textSize(boxHeight);
+  textAlign(LEFT,TOP);
+  if(!isArg0Hidden){
+    text(""+arg0/100%10+arg0/10%10+arg0/1%10,arrArg0[NUM_BOXES-1][0]+boxWidth+4*boxSpacing,arrArg0[NUM_BOXES-1][1]);
+  }
+  text(""+arg1/100%10+arg1/10%10+arg1/1%10,arrArg1[NUM_BOXES-1][0]+boxWidth+4*boxSpacing,arrArg1[NUM_BOXES-1][1]);
+  text(""+result/100%10+result/10%10+result/1%10,arrResult[NUM_BOXES-1][0]+boxWidth+4*boxSpacing,arrResult[NUM_BOXES-1][1]);
+  char chOper;
+  if(typeOper==1){
+    chOper='&';
+  } else if(typeOper==2){
+    chOper='|';
+  } else if(typeOper==3){
+    chOper='^';
+  } else{
+    chOper='0';
+  }
+  text(chOper,arrArg1[0][0]-4*boxSpacing,arrArg1[0][1]);
+  if(chOper=='&'){
+    result=arg0&arg1;
+  } else if(chOper=='|'){
+    result=arg0|arg1;
+  } else if(chOper=='^'){
+    result=arg0^arg1;
+  } else{
+    result=0;
+  }
+  
+  textAlign(CENTER,TOP);
+  textSize(boxWidth/2.0f);
+  for(int i=0;i<NUM_BOXES;i++){
+    char superScript=(char)(0x2077-i);
+    if(i==4) superScript='³';
+    else if(i==5) superScript='²';
+    else if(i==6) superScript='¹';
+    text("2"+superScript,arrResult[i][0],arrResult[i][1]+boxHeight+2*boxSpacing,boxWidth,boxHeight);
+  }
+  
+}
+
+
+void mousePressed(){
+  if(mouseButton==LEFT){
+    for(int i=0;i<NUM_BOXES;i++){
+      if(isMouseIn(arrArg0[i]) && !isArg0Hidden){
+        arg0^=(1<<NUM_BOXES-1-i);
+        return;
+      } else if(isMouseIn(arrArg1[i])){
+        arg1^=(1<<NUM_BOXES-1-i);
+      }
+    }
+  } else if(mouseButton==RIGHT){
+    typeOper++;
+    if(typeOper>NUM_OPERS) typeOper=0;
+  }
+}
+
+void keyPressed(){
+  if(key=='h' || key=='H'){
+    isArg0Hidden=true;
+  } else if(key=='r' || key=='R'){
+    isArg0Hidden=false;
+  } else if(key=='v' || key=='V'){
+    arg0=int(random(256));
+  }
+}
+
+
+
+void showBitBox(float startingX,float startingY,float boxWidth,float boxHeight,boolean isActive){
+  final color BLACK = color(0);
+  final color ON = #a1e01f;
+  final color OFF = #333333;
+  
+  strokeWeight(2);
+  stroke(BLACK);
+  if(isActive){
+    fill(ON);
+  } else{
+    fill(OFF);
+  }
+  rect(startingX,startingY,boxWidth,boxHeight);  
+}
+
+boolean isMouseIn(float[] arr){
+  if(arr.length==4){
+    if(mouseX>=arr[0] && mouseX<=arr[0]+arr[3] && mouseY>=arr[1] && mouseY<=arr[1]+arr[3]) return true;
+    else return false;    
+  }
+  else return false; 
+}
